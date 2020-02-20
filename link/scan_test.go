@@ -21,9 +21,9 @@ func linksAreEqual(a, b []Link) bool {
 }
 
 
-func handleFileTest(t *testing.T, filePath string, expected *Links) {
+func handleFileTest(t *testing.T, filePath string, expected Links) {
 	actual := ScanLinksFromFile(filePath)
-	if !linksAreEqual(*actual, *expected) {
+	if !linksAreEqual(actual, expected) {
 		t.Logf("Expected: \n%v\nGot: \n%v\n", expected.AsDeclaration(true), actual.AsDeclaration(true))
 		t.Fail()
 	}
@@ -38,7 +38,7 @@ func TestEx1(t *testing.T) {
 			Summary: "A link to another page",
 		},
 	}
-	handleFileTest(t, "ex1.html", &expected)
+	handleFileTest(t, "ex1.html", expected)
 }
 
 func TestEx2(t *testing.T) {
@@ -50,7 +50,7 @@ func TestEx2(t *testing.T) {
 			Href:    "https://github.com/gophercises",
 			Summary: "Gophercises is on Github !"},
 	}
-	handleFileTest(t, "ex2.html", &expected)
+	handleFileTest(t, "ex2.html", expected)
 }
 
 func TestEx3(t *testing.T) {
@@ -59,7 +59,7 @@ func TestEx3(t *testing.T) {
 		{Href: "/lost", Summary: "Lost? Need help?"},
 		{Href: "https://twitter.com/marcusolsson", Summary: "@marcusolsson"},
 	}
-	handleFileTest(t, "ex3.html", &expected)
+	handleFileTest(t, "ex3.html", expected)
 }
 
 
@@ -67,7 +67,7 @@ func TestEx4(t *testing.T) {
 	expected := Links{
 		Link{Href: "/dog-cat", Summary: "dog cat"},
 	}
-	handleFileTest(t, "ex4.html", &expected)
+	handleFileTest(t, "ex4.html", expected)
 }
 
 
@@ -75,6 +75,6 @@ func TestNestLink(t *testing.T) {
 	expected := Links{
 		Link{Href: "#", Summary: "Something here and here"},
 	}
-	handleFileTest(t, "nestLink.html", &expected)
+	handleFileTest(t, "nestLink.html", expected)
 }
 

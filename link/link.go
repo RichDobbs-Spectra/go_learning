@@ -23,7 +23,8 @@ func NewLink(href string, chunks []string) Link {
 	return Link{Href: href, Summary: summary}
 }
 
-// Links is a collection of links
+// Links is a collection of links. 
+// It is declared as a type to allow methods to be implemented.
 type Links []Link
 
 // AsDeclaration outputs a string suitable for inclusion as a declaration in source code
@@ -49,7 +50,7 @@ func (links *Links) AsDeclaration(stripPackageName bool) string {
 }
 
 // ScanLinksFromFile loads links from a file in HTML format
-func ScanLinksFromFile(filepath string) *Links {
+func ScanLinksFromFile(filepath string) Links {
 	f, err := os.Open(filepath)
 	if err != nil {
 		log.Fatal(err)
@@ -59,18 +60,19 @@ func ScanLinksFromFile(filepath string) *Links {
 }
 
 type linkState struct {
-	depth int
-	href string
+	depth  int
+	href   string
 	chunks []string
-	links *Links
+	links  Links
 }
+
 // ScanForLinks finds links in html implemented as anchor tags.
 // It is implemented as a state machine working on the golang.org/x/net/html html.Tokenizer
-func ScanForLinks(r io.Reader) *Links {
-	links := Links(make([]Link, 0))
+func ScanForLinks(r io.Reader) Links {
+	//links := Links(make([]Link, 0))
 	state := linkState{
 		chunks: make([]string, 0),
-		links: &links,
+		links:  Links(make([]Link, 0)),
 	}
 	tokenizer := html.NewTokenizer(r)
 	for {
@@ -83,6 +85,8 @@ func ScanForLinks(r io.Reader) *Links {
 	return state.links
 }
 
+// handleToken processes a single token while updating the link state.  
+// It returns whether the processing should be done.
 func handleToken(token html.TokenType, tokenizer *html.Tokenizer, state *linkState) bool {
 
 	switch token {
@@ -115,16 +119,7 @@ func handleToken(token html.TokenType, tokenizer *html.Tokenizer, state *linkSta
 			state.depth--
 			if state.depth == 0 {
 				link := NewLink(state.href, state.chunks)
-				oldLinks := state.links
-				links := append(*oldLinks, link)
-				state.links = &links
-				state.chunks = state.chunks[:0]
-			}
-
-			if state.depth < 0 {
-				link := NewLink(state.href, state.chunks)
-				links := append(*state.links, link)
-				state.links = &links
+				state.links = append(state.links, link)
 				state.chunks = state.chunks[:0]
 			}
 		}
