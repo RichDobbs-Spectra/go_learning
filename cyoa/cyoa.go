@@ -28,7 +28,8 @@ func main() {
 		Template: t,
 		Story:    story,
 	}
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	log.Fatal(http.ListenAndServe(":8080", &handler))
+	
 
 }
 
@@ -37,7 +38,7 @@ type StoryHandler struct {
 	Story    map[string]StoryArc
 }
 
-func (sh StoryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (sh *StoryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// http.Error(w, "Template execution not implemented", http.StatusNotImplemented)
 	arc := "intro"
 	path := r.URL.Path

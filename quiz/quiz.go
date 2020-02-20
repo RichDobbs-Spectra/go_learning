@@ -1,6 +1,6 @@
-// This package implements the quiz, with a variation on part 2.  
-// Instead of having an timer for the entire test, it handles a timer 
-// for each question.  This was more challenging, since characters 
+// This package implements the quiz, with a variation on part 2.
+// Instead of having an timer for the entire test, it handles a timer
+// for each question.  This was more challenging, since characters
 // entered for previous questions had to be properly discarded
 // to get the desired behavior.
 
@@ -17,16 +17,19 @@ import (
 	"time"
 )
 
+// QuizItem stores the question an answer for one item in the quiz.
 type QuizItem struct {
 	Question string
 	Answer   string
 }
 
+// CharWithTime stores a single character of input along with the time that it was found.
 type CharWithTime struct {
 	char string
 	time time.Time
 }
 
+// ErrTimeout is a custom error
 type ErrTimeout struct {
 	message string
 }
@@ -35,11 +38,12 @@ func (e *ErrTimeout) Error() string {
 	return e.message
 }
 
+// NewErrorTimeout is a error constructor.
 func NewErrorTimeout(message string) *ErrTimeout {
 	return &ErrTimeout{message: message}
 }
 
-func OldReadQuizFromFile(filepath string) []QuizItem {
+func oldReadQuizFromFile(filepath string) []QuizItem {
 	file, err := os.Open(filepath)
 	if err != nil {
 		log.Fatal(err)
@@ -55,6 +59,7 @@ func OldReadQuizFromFile(filepath string) []QuizItem {
 	return items
 }
 
+// ReadQuizFromFile reads a CSV file for a quiz and returns the quiz items.
 func ReadQuizFromFile(filepath string) []QuizItem {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -77,6 +82,7 @@ func ReadQuizFromFile(filepath string) []QuizItem {
 	return items
 }
 
+// ReadCharsWithTime reads stdio and places each character into a channel of characters with time.
 func ReadCharsWithTime(chars chan CharWithTime) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -88,9 +94,10 @@ func ReadCharsWithTime(chars chan CharWithTime) {
 	}
 }
 
-func ReadStringWithTimeout(chars chan CharWithTime, timeout time.Duration) (string, error) {
+// ReadLineWithTimeout reads a single line from the chars channel that was input
+// between when this call is made and before a timeout has occurred.
+func ReadLineWithTimeout(chars chan CharWithTime, timeout time.Duration) (string, error) {
 	start := time.Now()
-	// end := start.Add(timeout)
 	result := ""
 	for {
 		select {
@@ -112,26 +119,12 @@ func ReadStringWithTimeout(chars chan CharWithTime, timeout time.Duration) (stri
 
 }
 
-func ReadStringFromStdioWithTimeout(timeout time.Duration) (string, error) {
-	reader := bufio.NewReader(os.Stdin)
-	var result string
-	for {
-		r, _, err := reader.ReadRune()
-		if err != nil {
-			log.Fatal(err)
-		}
-		if string(r) == "\n" {
-			break
-		}
-		result += string(r)
-	}
-	return result, nil
-}
-
+// HandleQuestion processes one question in the quiz.
+// If the
 func HandleQuestion(i int, quizItem QuizItem, timeOut time.Duration, chars chan CharWithTime) (correct bool) {
 	fmt.Printf("  Question %v %v: ", i, quizItem.Question)
 
-	response, err := ReadStringWithTimeout(chars, timeOut)
+	response, err := ReadLineWithTimeout(chars, timeOut)
 
 	if err != nil {
 		switch err.(type) {
