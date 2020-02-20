@@ -22,13 +22,18 @@ func main() {
 	}
 	links := scanForLinks(f)
 	// fmt.Printf("%#v \n", links)
-	s, _ := json.MarshalIndent(links, "", "  ")
-	fmt.Println(string(s))
+	fmt.Println(LinksToString(links))
 }
 
 type Link struct {
 	Href    string
 	Summary string
+}
+
+
+func LinksToString(links []Link) string {
+	s, _ := json.MarshalIndent(links, "", "  ")
+	return string(s)
 }
 
 func NewLink(href string, chunks []string) Link {
@@ -47,9 +52,19 @@ func GetAttrFromTokenizer(tokenizer *html.Tokenizer, attrName string) (value str
 			return "", false
 		}
 	}
-
 }
 
+func scanLinksFromFile(filepath string) []Link {
+	f, err := os.Open(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	links := scanForLinks(f)
+	return links	
+}
+
+
+// scanForLinks finds links in html implemented as anchor tags.
 func scanForLinks(r io.Reader) []Link {
 	links := make([]Link, 0)
 	tokenizer := html.NewTokenizer(r)
